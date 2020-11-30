@@ -1,6 +1,6 @@
 from peer import Peer
 from message import Message
-#import resolution
+from resolution import Resolution
 
 AS1=Peer("AS1")
 AS2=Peer("AS2")
