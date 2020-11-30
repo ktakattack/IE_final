@@ -1,5 +1,5 @@
-import Message
-import Queue
+from message import Message
+
 import json
 
 class Peer:
@@ -11,23 +11,26 @@ class Peer:
     # Dreceived ={} #set of credentials pthis received from others
     # Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
     # Dnew={}
-	PolicyVault = ObjDict() #i.e. {"C4": "True"}
-	ResourceVault = ObjDict() #i.e. {"C4": "alice@kent.edu"}
+    PolicyVault = dict #i.e. {"C4": "True"}
+    ResourceVault = dict #i.e. {"C4": "alice@kent.edu"}
     
-	def __init__(self):
-		with open("<PeerName>.json",'r') as Mypolicy:  # substitute Peer Name with current peer name ( AS_2,Client,..)
-        self.PolicyVault= json.load(Mypolicy)
-		print (self.PolicyVault, '<PeerName>_Policy_Vault')
-		
-		with open("<PeerName>.json",'r') as MyCredentials:  # substitute Peer Name with current peer name ( AS_2,Client,..)
-		self.ResourceVault= json.load(MyCredentials)
-		print (self.ResourceVault, 'EX.Email')
+    def __init__(self, data):
+        self.PeerName = data
+        print("Initializing " + self.PeerName)
+
+        with open(self.PeerName + "_Policy.json",'r') as Mypolicy:  # substitute Peer Name with current peer name ( AS_2,Client,..)
+            self.PolicyVault= json.load(Mypolicy)
+        print (self.PolicyVault, self.PeerName + '_Policy_Vault')
+
+        with open(self.PeerName + "_Resource.json",'r') as MyCredentials:  # substitute Peer Name with current peer name ( AS_2,Client,..)
+            self.ResourceVault= json.load(MyCredentials)
+        print (self.ResourceVault, self.PeerName + '_Resource_Vault')
         
-    def Send_Message(m, receiver):
-        print ("Sending message to: " + receiver)
+    def Send_Message(self, m, receiver):
+        print ("Sending message (type: " + m.Mtype + ", resource: " + m.resource + ") to: " + receiver.PeerName)
         
-    def Receive_Message(m, sender):
-        print("Received message from: " + sender)
+    def Receive_Message(self, m, sender):
+        print("Received message (type: " + m.Mtype + ", resource: " + m.resource + ") from: " + sender.PeerName)
     
     # def ResolutionResolver(m):
         # if m.type == "offer":
