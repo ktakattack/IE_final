@@ -1,4 +1,4 @@
-import Message
+import message as Message
 import Queue
 import json
 

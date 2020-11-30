@@ -1,6 +1,5 @@
-import peer
-import message
-import resolution
+import peer as Peer
+import message as Message
 
 AS1=Peer()
 AS2=Peer()
@@ -11,6 +10,13 @@ def main():
     print("main is running")
 
 #Client (Request C1) -> 
+    receiver=Resource
+    #need to get policy c1.json
+    Peer().self.PolicyVault
+    #send message(m) to RS(receiver)
+    Peer().send_Message(receiver)
+    Message().checkMtype()
+    Message().displayMessage()
 
 # RS (Request C2, C3) -> 
 # Client (Request C2) -> 
