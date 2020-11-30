@@ -14,20 +14,23 @@ class Peer:
     PolicyVault = dict #i.e. {"C4": "True"}
     ResourceVault = dict #i.e. {"C4": "alice@kent.edu"}
     
-    def __init__(self):
-        with open("<PeerName>.json",'r') as Mypolicy:  # substitute Peer Name with current peer name ( AS_2,Client,..)
-            self.PolicyVault= json.load(Mypolicy)
-        print (self.PolicyVault, '<PeerName>_Policy_Vault')
+    def __init__(self, data):
+        self.PeerName = data
+        print("Initializing " + self.PeerName)
 
-        with open("<PeerName>.json",'r') as MyCredentials:  # substitute Peer Name with current peer name ( AS_2,Client,..)
+        with open(self.PeerName + "_Policy.json",'r') as Mypolicy:  # substitute Peer Name with current peer name ( AS_2,Client,..)
+            self.PolicyVault= json.load(Mypolicy)
+        print (self.PolicyVault, self.PeerName + '_Policy_Vault')
+
+        with open(self.PeerName + "_Resource.json",'r') as MyCredentials:  # substitute Peer Name with current peer name ( AS_2,Client,..)
             self.ResourceVault= json.load(MyCredentials)
-        print (self.ResourceVault, 'EX.Email')
+        print (self.ResourceVault, self.PeerName + '_Resource_Vault')
         
     def Send_Message(self, m, receiver):
-        print ("Sending message (type: " + m.Mtype + ", resource: " + m.resource + ") to: " + receiver)
+        print ("Sending message (type: " + m.Mtype + ", resource: " + m.resource + ") to: " + receiver.PeerName)
         
     def Receive_Message(self, m, sender):
-        print("Received message (type: " + m.Mtype + ", resource: " + m.resource + ") from: " + sender)
+        print("Received message (type: " + m.Mtype + ", resource: " + m.resource + ") from: " + sender.PeerName)
     
     # def ResolutionResolver(m):
         # if m.type == "offer":

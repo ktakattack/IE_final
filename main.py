@@ -2,22 +2,19 @@ from peer import Peer
 from message import Message
 #import resolution
 
-AS1=Peer()
-AS2=Peer()
-Client=Peer()
-Resource=Peer()
+AS1=Peer("AS1")
+AS2=Peer("AS2")
+Client=Peer("Client")
+RS=Peer("RS")
 
 def main():
     print("main is running")
 
 #Client (Request C1) -> 
-    receiver=Resource
-    #need to get policy c1.json
-    Peer().self.PolicyVault
-    #send message(m) to RS(receiver)
-    Peer().send_Message(receiver)
-    Message().checkMtype()
-    Message().displayMessage()
+    M1 = Message("request", "Client", "RS", list(RS.ResourceVault.keys())[0], list(Client.PolicyVault.keys())[0])
+
+    Client.Send_Message(M1, RS)
+    RS.Receive_Message(M1, Client)
 
 # RS (Request C2, C3) -> 
 # Client (Request C2) -> 
