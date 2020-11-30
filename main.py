@@ -1,5 +1,6 @@
-import peer as Peer
-import message as Message
+from peer import Peer
+from message import Message
+#import resolution
 
 AS1=Peer()
 AS2=Peer()
