@@ -1,4 +1,5 @@
 from message import Message
+
 import json
 
 class Peer:
