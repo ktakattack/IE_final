@@ -1,21 +1,14 @@
 
 class Message:
     #Kristi- uncertain how to initialize these
-    def __init__(self, Mtype, sender, receiver,resource,policy): #Set the values in the constructor
+    def __init__(self, Mtype, sender, receiver,credential,sources): #Set the values in the constructor
         self.Mtype= Mtype #offer or request
         self.sender= sender #from
         self.receiver= receiver #to
-        self.resource= resource #First value from json
-        self.policy = policy #Second value from json
+        self.credential= credential #First value from json
+        self.sources= sources
+        #self.policy = policy #Second value from json
 
-    def displayMessage(self): #Printing the values
-        print ("Type:", self.Mtype, "Sender:", self.sender, "Receiver:", self.receiver, "Resource:",self.resource, "Policy:", self.policy)
-
-    def checkMtype(self):
-        if self.Mtype == "request":
-            print("This exchanges requests this resource:",self.resource, "from:", self.receiver)
-        else:
-            print("This exchanges offers this resource:", self.resource, "from:", self.sender)
 
 # def main():
 #     print ("Welcome to testing a message creation\n") #Asking for user input just to test
