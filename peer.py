@@ -1,16 +1,17 @@
 from message import Message
+from queue import Queue
 
 import json
 
 class Peer:
     PeerName = ""  # RS,AS_2,AS_3,Client
-    # Qsent={} # set of credentials pthis requested from others
-    # Qrecievd={} # set of credentials others requested from pthis
-    # Qnew={}
-    # Dsent={} # set of credentials pthis sent to others
-    # Dreceived ={} #set of credentials pthis received from others
-    # Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
-    # Dnew={}
+    Qsent={} # set of credentials pthis requested from others
+    Qrecievd={} # set of credentials others requested from pthis
+    Qnew={} # return list of credentials required (requests)
+    Dsent={} # set of credentials pthis sent to others
+    Dreceived ={} #set of credentials pthis received from others
+    Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
+    Dnew={} # return list of credentials already available (offers)
     PolicyVault = dict #i.e. {"C4": "True"}
     ResourceVault = dict #i.e. {"C4": "alice@kent.edu"}
     
@@ -24,26 +25,31 @@ class Peer:
         with open(self.PeerName + "_Resource.json",'r') as MyCredentials:  # set ResourceVault from json
             self.ResourceVault= json.load(MyCredentials)
     
-    def send_Message():
+    def send_Message(self):
         print ("unused function")
 
     def Receive_Message(self, m):
         return self.ResolutionResolver(m)
     
-    def ResolutionResolver(m):
-        if m.type == "offer":
-            # calculate new disclousre Dnew that Pthis will send to other parties
-            Dunlock.put(m.credential)
-            Dnew = (intersection(Dunlock,Qrecievd)-Dsent)  # intersect and - need code
+    def ResolutionResolver(self, m):
+        if m.Mtype == "offer":
+            # calculate new disclosure Dnew that Pthis will send to other parties
+            self.ResourceVault[m.credentials] = m.resource
+            print(self.PeerName + " received offer of [Credential: " + m.credentials + ", Resource: " + m.resource + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
+            print(self.PeerName + ".ResourceVault contains:")
+            print(self.ResourceVault.items())
             
-        elif m.type=="request":
-            if m.credential in Dunlock:
-                Dnew={m.credential}
-            else:
-                # calculate new Qnew that pthis will request from others, based on th epolicy
-                Drelevent= peer.policy.credential # the policy for the credential requested
-                Qnew= Drelevent - Drecived-Qsent
-        return (#list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request # enqueue then in Mreceived )
+            #Dnew = (intersection(Dunlock,Qrecievd)-Dsent)  # intersect and - need code
+            
+        # elif m.type=="request":
+        #     print(self.PeerName + " received request for credential: " + m.credential + ".")
+        #     if m.credential in Dunlock:
+        #         Dnew={m.credential}
+        #     else:
+        #         # calculate new Qnew that pthis will request from others, based on the policy
+        #         Drelevent= peer.policy.credential # the policy for the credential requested
+        #         Qnew= Drelevent - Drecived-Qsent
+        return Queue() #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
             
             
 

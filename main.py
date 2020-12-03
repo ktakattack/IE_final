@@ -33,13 +33,14 @@ PeerList = [AS1, AS2, Client, RS]
 messageQueue = Queue()
 
 def main():
-    M1 = Message("request", "Client", "RS", "C1", [], [])
-    print("create initial message, type: " + M1.Mtype + " sender: " + M1.sender + " receiver: " + M1.receiver + " credential: " + M1.credentials + " sources: " + M1.sources + " resources: " + M1.resource)
+    M1 = Message("offer", "Client", "RS", "C2", [], "PeepoClap")
+    print("create initial message, type: " + M1.Mtype + " sender: " + M1.sender + " receiver: " + M1.receiver + " credential: " + M1.credentials + " sources: " + str(M1.sources).strip('[]') + " resources: " + M1.resource)
 
     print("Initializing communication protocol and enqueueing first message")
     communication_protocol(M1)
 
 def communication_protocol(msg):
+    recipientFound = False
     messageQueue.put(msg) #insert first message
 
     while(not messageQueue.empty()): #will run as long as messageQueue still has pending messages
@@ -47,13 +48,14 @@ def communication_protocol(msg):
         
         for peer in PeerList:
             if peer.PeerName == currentMsg.receiver: #search list of peers for PeerName matching msg.receiver name
+                recipientFound = True
                 resultMsgs = peer.Receive_Message(currentMsg) #calls the receiver Peer's ResolutionResolver, it should return a new message/list of messages if more requests/offers need to be sent, it will be an empty list if not
-                if (not resultMsgs.empty()): #enqueue new messages if resultMsgs not empty
-                    for msg in resultMsgs:
-                        messageQueue.put(resultMsgs.get())
-            else:
-                print("Message recipient not found.")
+                while (not resultMsgs.empty()): #enqueue new messages if resultMsgs not empty
+                    messageQueue.put(resultMsgs.get())
+                
 
+    if(not recipientFound):
+        print("Message recipient not found.")
 
 
 if __name__ == '__main__':
