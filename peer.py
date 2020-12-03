@@ -32,26 +32,57 @@ class Peer:
         return self.ResolutionResolver(m)
     
     def ResolutionResolver(self, m):
+        OfferList = []
+        RequestList = []
+        resultMsgQueue = Queue()
+
         if m.Mtype == "offer":
             # calculate new disclosure Dnew that Pthis will send to other parties
-            self.ResourceVault[m.credentials] = m.resource
-            print(self.PeerName + " received offer of [Credential: " + m.credentials + ", Resource: " + m.resource + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
+            self.ResourceVault[m.credential] = m.resource
+            self.PolicyVault[m.credential] = "True" #automatically set received resources to free share
+            print(self.PeerName + " received offer of [Credential: " + m.credential + ", resource: " + str(m.resource).strip('[]') + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
             print(self.PeerName + ".ResourceVault contains:")
             print(self.ResourceVault.items())
             
             #Dnew = (intersection(Dunlock,Qrecievd)-Dsent)  # intersect and - need code
             
-        # elif m.type=="request":
-        #     print(self.PeerName + " received request for credential: " + m.credential + ".")
-        #     if m.credential in Dunlock:
-        #         Dnew={m.credential}
-        #     else:
-        #         # calculate new Qnew that pthis will request from others, based on the policy
-        #         Drelevent= peer.policy.credential # the policy for the credential requested
-        #         Qnew= Drelevent - Drecived-Qsent
-        return Queue() #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
+        elif m.Mtype=="request":
+            print(self.PeerName + " received request for credential: " + m.credential + ".")
+
+            OfferedCredentials = m.resource
+
+            if m.credential in self.ResourceVault:
+                if(self.PolicyVault[m.credential] == "True"):
+                    print("Policy is True, offer resource.")
+                    OfferList.append(m.credential)
+                else:
+                    RequiredCredentialsArray = self.PolicyVault[m.credential][1:-1].split(',') #converts policy to array of required credentials i.e. "[C2, C3]" -> ["C2","C3"]
+                    for cred in RequiredCredentialsArray:
+                        if cred in OfferedCredentials: #if required credential is already offered in message, skip
+                            continue
+                        else: #if required credential not in message, add to request list
+                            RequestList.append(cred)
+                    if not RequestList: #if required credentials list is empty, go ahead and offer the resource
+                        OfferList.append(m.credential)
             
+            else:
+                print(self.PeerName + " does not have this resource.")
+                # # calculate new Qnew that pthis will request from others, based on the policy
+                # Drelevent= peer.policy.credential # the policy for the credential requested
+                # Qnew= Drelevent - Drecived-Qsent
+        
+        for offer in OfferList:
+            resultMsgQueue.put(Message("offer", self.PeerName, m.sender, offer, [], [self.ResourceVault[offer]]))
+
+        return resultMsgQueue #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
             
+# How to get credentials/sources from dictionary:
+# RSPolicyValue = RS.PolicyVault["C1"][1:-1], 
+# RSPolicyValue = RSPolicyValue.split(',')
+# 
+# printing those values:
+# for obj in RSPolicyValue:
+#     print(obj)
 
 # Message flow:
 # Client (Request C1) -> 

@@ -33,8 +33,9 @@ PeerList = [AS1, AS2, Client, RS]
 messageQueue = Queue()
 
 def main():
-    M1 = Message("offer", "Client", "RS", "C2", [], "PeepoClap")
-    print("create initial message, type: " + M1.Mtype + " sender: " + M1.sender + " receiver: " + M1.receiver + " credential: " + M1.credentials + " sources: " + str(M1.sources).strip('[]') + " resources: " + M1.resource)
+    #M1 = Message("request", "Client", "RS", "C1", [], [])
+    M1 = Message("request", "Client", "AS1", "C2", [], [])
+    print("create initial message, type: " + M1.Mtype + " sender: " + M1.sender + " receiver: " + M1.receiver + " credential: " + M1.credential + " sources: " + str(M1.source).strip('[]') + " resources: " + str(M1.resource).strip('[]'))
 
     print("Initializing communication protocol and enqueueing first message")
     communication_protocol(M1)
