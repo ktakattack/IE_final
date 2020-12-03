@@ -23,35 +23,29 @@ class Peer:
 
         with open(self.PeerName + "_Resource.json",'r') as MyCredentials:  # set ResourceVault from json
             self.ResourceVault= json.load(MyCredentials)
-        
+    
+    def send_Message():
+        print ("unused function")
+
     def Receive_Message(self, m):
         return self.ResolutionResolver(m)
     
     def ResolutionResolver(m):
-        if m.Mtype == "offer":
-            #calculate new disclousre Dnew that Pthis will send to other parties
+        if m.type == "offer":
+            # calculate new disclousre Dnew that Pthis will send to other parties
             Dunlock.put(m.credential)
             Dnew = (intersection(Dunlock,Qrecievd)-Dsent)  # intersect and - need code
             
-        elif m.Mtype=="request":
-            if m.credential in Dunlock: #need code to add credentials to list of unlocked credentials, i.e. RS has C1 from RS_Resource.json
-                Dnew={m.credential} #if credential is in list of unlocked credentials then:
-                if self.PolicyVault[m.credential] == "True": #it will check PolicyVault if true or an array of required credentials
-                    print("ok to offer " + self.ResourceVault[m.credential])
-                elif isinstance(self.PolicyVault[m.credential],list):
-                    for credential in self.PolicyVault[m.credential]:
-                        resMsg = Message("request", self.PeerName, credential., "C1", [], [])
-                    #send messages to this list of sources
-            elif m.sources: #if sources array is not empty
-                #create new messages using sources i.e. m={"request",RS,Client,[C2,C3],[AS1,AS2]}
-                print("new message")
-            elif not m.sources:
-                print("Invalid request, credential does not exist")
+        elif m.type=="request":
+            if m.credential in Dunlock:
+                Dnew={m.credential}
             else:
-                #calculate new Qnew that pthis will request from others, based on th epolicy
+                # calculate new Qnew that pthis will request from others, based on th epolicy
                 Drelevent= peer.policy.credential # the policy for the credential requested
                 Qnew= Drelevent - Drecived-Qsent
-        return [] #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request # enqueue then in Mreceived
+        return (#list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request # enqueue then in Mreceived )
+            
+            
 
 # Message flow:
 # Client (Request C1) -> 
