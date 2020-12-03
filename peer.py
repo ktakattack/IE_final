@@ -5,13 +5,13 @@ import json
 
 class Peer:
     PeerName = ""  # RS,AS_2,AS_3,Client
-    Qsent={} # set of credentials pthis requested from others
-    Qrecievd={} # set of credentials others requested from pthis
-    Qnew={} # return list of credentials required (requests)
-    Dsent={} # set of credentials pthis sent to others
-    Dreceived ={} #set of credentials pthis received from others
-    Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
-    Dnew={} # return list of credentials already available (offers)
+    # Qsent={} # set of credentials pthis requested from others
+    # Qrecievd={} # set of credentials others requested from pthis
+    # Qnew={} # return list of credentials required (requests)
+    # Dsent={} # set of credentials pthis sent to others
+    # Dreceived ={} #set of credentials pthis received from others
+    # Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
+    # Dnew={} # return list of credentials already available (offers)
     PolicyVault = dict #i.e. {"C4": "True"}
     ResourceVault = dict #i.e. {"C4": "alice@kent.edu"}
     
@@ -96,11 +96,11 @@ class Peer:
                 # Qnew= Drelevent - Drecived-Qsent
         
         for offer in OfferList:
-            print("Adding offer for " + offer + " to " + m.sender + " to queue.")
+            print("Adding offer for " + offer + " from " + self.PeerName + " to " + m.sender + " to queue.")
             resultMsgQueue.put(Message("offer", self.PeerName, m.sender, offer, [], [self.ResourceVault[offer]]))
 
         for request in RequestDict:
-            print("Adding request for " + request + " from " + RequestDict[request] + " to queue.")
+            print("Adding request from " + m.sender + " to get " + request + " from " + RequestDict[request] + " to queue.")
             resultMsgQueue.put(Message("request", m.sender, RequestDict[request], request, RequestDict[request], []))    
 
         return resultMsgQueue #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
