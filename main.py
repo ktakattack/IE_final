@@ -1,20 +1,29 @@
 from peer import Peer
 from message import Message
-from resolution import Resolution
 
-AS1=Peer("AS1")
-AS2=Peer("AS2")
-Client=Peer("Client")
-RS=Peer("RS")
+
 
 def main():
+    AS1=Peer("AS1")
+    AS2=Peer("AS2")
+    Client=Peer("Client")
+    RS=Peer("RS")
+
+    print(RS.PolicyVault["C1"])
+
+    RSPolicyValue = RS.PolicyVault["C1"][1:-1]
+    RSPolicyValue = RSPolicyValue.split(',')
+
+    for obj in RSPolicyValue:
+        print(obj)
+    
     print("main is running")
 
 #Client (Request C1) -> 
-    M1 = Message("request", "Client", "RS", list(RS.ResourceVault.keys())[0], list(Client.PolicyVault.keys())[0])
+    M1 = Message("request", "Client", "RS", "C1", [])
 
-    Client.Send_Message(M1, RS)
-    RS.Receive_Message(M1, Client)
+    Client.Send_Message(M1)
+    RS.Receive_Message(M1)
 
 # RS (Request C2, C3) -> 
 # Client (Request C2) -> 
