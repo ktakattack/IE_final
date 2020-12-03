@@ -34,6 +34,11 @@ messageQueue = Queue()
 
 def main():
     M1 = Message("request", "Client", "RS", "C1", [], [])
+    
+    #convert lists to strings
+    M1.sources = ' '.join([str(elem) for elem in M1.sources]) 
+    M1.resource = ' '.join([str(elem) for elem in M1.resource]) 
+    
     print("create initial message, type: " + M1.Mtype + " sender: " + M1.sender + " receiver: " + M1.receiver + " credential: " + M1.credentials + " sources: " + M1.sources + " resources: " + M1.resource)
 
     print("Initializing communication protocol and enqueueing first message")
