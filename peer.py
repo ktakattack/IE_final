@@ -34,6 +34,8 @@ class Peer:
     def ResolutionResolver(self, m):
         OfferList = []
         RequestList = []
+        SourceList = []
+        RequestDict = {} #Key = RequestCred, Value = Source
         resultMsgQueue = Queue()
 
         if m.Mtype == "offer":
@@ -56,23 +58,50 @@ class Peer:
                     print("Policy is True, offer resource.")
                     OfferList.append(m.credential)
                 else:
-                    RequiredCredentialsArray = self.PolicyVault[m.credential][1:-1].split(',') #converts policy to array of required credentials i.e. "[C2, C3]" -> ["C2","C3"]
-                    for cred in RequiredCredentialsArray:
+                    PolicyArray = self.PolicyVault[m.credential][1:-1].split(',') #converts policy to array of required credentials i.e. "[C2,AS1,C3,AS2]" -> ["C2","AS1","C3","AS2"]
+                    i = 0
+                    for obj in PolicyArray: #splitting policy vault into requested credential (even number), sources (odd number)
+                        if(i%2 == 0):
+                            RequestList.append(obj)
+                        else:
+                            SourceList.append(obj)
+                        i += 1
+
+                    print(m.credential + " requires the following resources: ")
+                    j = 0
+                    for cred in RequestList:
+                        print(cred)
+                    for cred in RequestList:
                         if cred in OfferedCredentials: #if required credential is already offered in message, skip
+                            print(cred + " is in OfferedCredentials, skipping.")
                             continue
                         else: #if required credential not in message, add to request list
-                            RequestList.append(cred)
+                            print(cred + " not found. Adding to request list.")
+                            RequestDict[cred]=SourceList[j]
+                        j += 1
                     if not RequestList: #if required credentials list is empty, go ahead and offer the resource
+                        print("All credentials received, offering " + m.credential + ".")
                         OfferList.append(m.credential)
             
             else:
                 print(self.PeerName + " does not have this resource.")
+                if(m.source):
+                    print("Source list provided. Adding to RequestList: ")
+                    RequestDict[m.credential] = m.source
+                    print("Request " + m.credential + " from " + m.source)
+                else:
+                    print("No sources, please request with proper credential name.")
                 # # calculate new Qnew that pthis will request from others, based on the policy
                 # Drelevent= peer.policy.credential # the policy for the credential requested
                 # Qnew= Drelevent - Drecived-Qsent
         
         for offer in OfferList:
+            print("Adding offer for " + offer + " to " + m.sender + " to queue.")
             resultMsgQueue.put(Message("offer", self.PeerName, m.sender, offer, [], [self.ResourceVault[offer]]))
+
+        for request in RequestDict:
+            print("Adding request for " + request + " from " + RequestDict[request] + " to queue.")
+            resultMsgQueue.put(Message("request", m.sender, RequestDict[request], request, RequestDict[request], []))    
 
         return resultMsgQueue #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
             
