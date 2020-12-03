@@ -48,8 +48,9 @@ def communication_protocol(msg):
         for peer in PeerList:
             if peer.PeerName == currentMsg.receiver: #search list of peers for PeerName matching msg.receiver name
                 resultMsgs = peer.Receive_Message(currentMsg) #calls the receiver Peer's ResolutionResolver, it should return a new message/list of messages if more requests/offers need to be sent, it will be an empty list if not
-                for msg in resultMsgs:#enqueue new messages
-                    messageQueue.put(resultMsgs.get())
+                if (not resultMsgs.empty()): #enqueue new messages if resultMsgs not empty
+                    for msg in resultMsgs:
+                        messageQueue.put(resultMsgs.get())
             else:
                 print("Message recipient not found.")
 
