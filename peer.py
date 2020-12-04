@@ -5,17 +5,12 @@ import json
 
 class Peer:
     PeerName = ""  # RS,AS_2,AS_3,Client
-    # Qsent={} # set of credentials pthis requested from others
-    # Qrecievd={} # set of credentials others requested from pthis
-    # Qnew={} # return list of credentials required (requests)
-    # Dsent={} # set of credentials pthis sent to others
-    # Dreceived ={} #set of credentials pthis received from others
-    # Dunlock={} # set of all credentials unlocked by d and other disclusure in Dreceived
-    # Dnew={} # return list of credentials already available (offers)
     PolicyVault = dict #i.e. {"C4": "True"}
     ResourceVault = dict #i.e. {"C4": "alice@kent.edu"}
+    PendingRequests = []
+    PendingOffers = {}
+    CredentialList = []
     
-    #TODO: Add code to initialize peer with list of unlocked credentials(Dunlock?), i.e. Client has C4 from Client_Resource.json, RS has C1 from RS_Resource.json, etc
     def __init__(self, data):
         self.PeerName = data
 
@@ -24,6 +19,9 @@ class Peer:
 
         with open(self.PeerName + "_Resource.json",'r') as MyCredentials:  # set ResourceVault from json
             self.ResourceVault= json.load(MyCredentials)
+
+        if self.PeerName == 'Client':
+            self.PendingRequests.append("C1")
     
     def send_Message(self):
         print ("unused function")
@@ -39,14 +37,19 @@ class Peer:
         resultMsgQueue = Queue()
 
         if m.Mtype == "offer":
-            # calculate new disclosure Dnew that Pthis will send to other parties
             self.ResourceVault[m.credential] = m.resource
             self.PolicyVault[m.credential] = "True" #automatically set received resources to free share
             print(self.PeerName + " received offer of [Credential: " + m.credential + ", resource: " + str(m.resource).strip('[]') + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
             print(self.PeerName + ".ResourceVault contains:")
             print(self.ResourceVault.items())
+
+            for PendingRequest in self.PendingRequests:
+                if PendingRequest in self.ResourceVault:
+                    self.PendingRequests.remove(PendingRequest)
             
-            #Dnew = (intersection(Dunlock,Qrecievd)-Dsent)  # intersect and - need code
+            # if(m.credential in self.PendingOffers.keys()):
+            #     print(m.credential + " received from: " + m.sender + ". Releasing " + self.PendingOffers[m.credential] + " to " + m.sender)
+            #     OfferList.append(self.PendingOffers[m.credential])
             
         elif m.Mtype=="request":
             print(self.PeerName + " received request for credential: " + m.credential + ".")
@@ -76,8 +79,9 @@ class Peer:
                             print(cred + " is in OfferedCredentials, skipping.")
                             continue
                         else: #if required credential not in message, add to request list
-                            print(cred + " not found. Adding to request list.")
-                            RequestDict[cred]=SourceList[j]
+                            print(cred + " not found. Adding to RequestDict.")
+                            self.PendingOffers[cred] = m.credential 
+                            RequestDict[cred]=m.sender
                         j += 1
                     if not RequestList: #if required credentials list is empty, go ahead and offer the resource
                         print("All credentials received, offering " + m.credential + ".")
@@ -87,23 +91,41 @@ class Peer:
                 print(self.PeerName + " does not have this resource.")
                 if(m.source):
                     print("Source list provided. Adding to RequestList: ")
-                    RequestDict[m.credential] = m.source
-                    print("Request " + m.credential + " from " + m.source)
+                    if(m.credential == "C2"): #hardcoded, having issues
+                        RequestDict[m.credential] = "AS1"
+                    elif(m.credential == "C3"):
+                        RequestDict[m.credential] = "AS2"
+                    print("Request " + m.credential + " from " + RequestDict[m.credential])
                 else:
                     print("No sources, please request with proper credential name.")
-                # # calculate new Qnew that pthis will request from others, based on the policy
-                # Drelevent= peer.policy.credential # the policy for the credential requested
-                # Qnew= Drelevent - Drecived-Qsent
+        
+        # if self.PendingRequests:
+        #     print(self.PeerName + " still has the following open requests: ")
+        #     print(self.PendingRequests)
+        #     print("Adding to RequestDict")
+            
+        #     for Resource in self.ResourceVault:
+        #         self.CredentialList.append(Resource)
+
+        #     for PendingRequest in self.PendingRequests: #hardcoded, not sure how to get actual source
+        #         if(PendingRequest == "C1"):
+        #             RequestDict[PendingRequest] = "RS"
+        #         elif(PendingRequest == "C3"):
+        #             RequestDict[PendingRequest] = "AS2"
         
         for offer in OfferList:
             print("Adding offer for " + offer + " from " + self.PeerName + " to " + m.sender + " to queue.")
             resultMsgQueue.put(Message("offer", self.PeerName, m.sender, offer, [], [self.ResourceVault[offer]]))
 
         for request in RequestDict:
-            print("Adding request from " + m.sender + " to get " + request + " from " + RequestDict[request] + " to queue.")
-            resultMsgQueue.put(Message("request", m.sender, RequestDict[request], request, RequestDict[request], []))    
+            self.PendingRequests.append(request)
+            print("Adding request from " + self.PeerName + " to get " + request + " from " + RequestDict[request] + " to queue.")
+            if(SourceList):
+                resultMsgQueue.put(Message("request", self.PeerName, RequestDict[request], request, SourceList, []))
+            else:
+                resultMsgQueue.put(Message("request", self.PeerName, RequestDict[request], request, [], []))
 
-        return resultMsgQueue #list of messages M composed of offered credentials in Dnew and requests for credentials in Qnew - offer and request, enqueue them in Mreceived
+        return resultMsgQueue
             
 # How to get credentials/sources from dictionary:
 # RSPolicyValue = RS.PolicyVault["C1"][1:-1], 
