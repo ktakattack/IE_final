@@ -10,7 +10,7 @@ class Peer:
     PendingRequests = []
     PendingOffers = {}
     CredentialList = []
-    
+
     def __init__(self, data):
         self.PeerName = data
 
@@ -22,13 +22,13 @@ class Peer:
 
         if self.PeerName == 'Client':
             self.PendingRequests.append("C1")
-    
-    def send_Message(self):
-        print ("unused function")
 
-    def Receive_Message(self, m):
-        return self.ResolutionResolver(m)
-    
+    #def send_Message(self):
+    #    print ("unused function")
+
+   # def Receive_Message(self):
+    #    print ("Discount is valid")
+
     def ResolutionResolver(self, m):
         OfferList = []
         RequestList = []
@@ -37,20 +37,37 @@ class Peer:
         resultMsgQueue = Queue()
 
         if m.Mtype == "offer":
-            self.ResourceVault[m.credential] = m.resource
-            self.PolicyVault[m.credential] = "True" #automatically set received resources to free share
-            print(self.PeerName + " received offer of [Credential: " + m.credential + ", resource: " + str(m.resource).strip('[]') + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
-            print(self.PeerName + ".ResourceVault contains:")
-            print(self.ResourceVault.items())
+
+            if(m.resource =="C3"):
+                self.ResourceVault[m.credential] = m.resource
+                self.PolicyVault[m.credential] = m.credential #"True" #automatically set received resources to free share
+                print(self.PeerName + " received offer of [Credential: " + m.credential + ", resource: " + str(m.resource).strip('[]') + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
+                print(self.PeerName + ".ResourceVault contains:")
+                #print(self.ResourceVault.items())
+                print( " PolicyVault ")
+                print(self.PolicyVault.items())
+                #print( " PendingOffers: ")
+                #print(self.PendingOffers.items())
+
+            else:
+                self.ResourceVault[m.credential] = m.resource
+                self.PolicyVault[m.credential] = "True" #automatically set received resources to free share
+                print(self.PeerName + " received offer of [Credential: " + m.credential + ", resource: " + str(m.resource).strip('[]') + "] from " + m.sender + ". Added credential/resource to " + self.PeerName + ".ResourceVault.")
+               # print(self.PeerName + ".ResourceVault contains:")
+                print( "PolicyVault ")
+                print(self.PolicyVault.items())
+               # print( " Resource ")
+                #print(self.ResourceVault.items())
 
             for PendingRequest in self.PendingRequests:
                 if PendingRequest in self.ResourceVault:
                     self.PendingRequests.remove(PendingRequest)
-            
+
+
             # if(m.credential in self.PendingOffers.keys()):
             #     print(m.credential + " received from: " + m.sender + ". Releasing " + self.PendingOffers[m.credential] + " to " + m.sender)
             #     OfferList.append(self.PendingOffers[m.credential])
-            
+
         elif m.Mtype=="request":
             print(self.PeerName + " received request for credential: " + m.credential + ".")
 
@@ -80,13 +97,13 @@ class Peer:
                             continue
                         else: #if required credential not in message, add to request list
                             print(cred + " not found. Adding to RequestDict.")
-                            self.PendingOffers[cred] = m.credential 
+                            self.PendingOffers[cred] = m.credential
                             RequestDict[cred]=m.sender
                         j += 1
                     if not RequestList: #if required credentials list is empty, go ahead and offer the resource
                         print("All credentials received, offering " + m.credential + ".")
                         OfferList.append(m.credential)
-            
+
             else:
                 print(self.PeerName + " does not have this resource.")
                 if(m.source):
@@ -98,12 +115,12 @@ class Peer:
                     print("Request " + m.credential + " from " + RequestDict[m.credential])
                 else:
                     print("No sources, please request with proper credential name.")
-        
+
         # if self.PendingRequests:
         #     print(self.PeerName + " still has the following open requests: ")
         #     print(self.PendingRequests)
         #     print("Adding to RequestDict")
-            
+
         #     for Resource in self.ResourceVault:
         #         self.CredentialList.append(Resource)
 
@@ -112,7 +129,7 @@ class Peer:
         #             RequestDict[PendingRequest] = "RS"
         #         elif(PendingRequest == "C3"):
         #             RequestDict[PendingRequest] = "AS2"
-        
+
         for offer in OfferList:
             print("Adding offer for " + offer + " from " + self.PeerName + " to " + m.sender + " to queue.")
             resultMsgQueue.put(Message("offer", self.PeerName, m.sender, offer, [], [self.ResourceVault[offer]]))
@@ -126,24 +143,24 @@ class Peer:
                 resultMsgQueue.put(Message("request", self.PeerName, RequestDict[request], request, [], []))
 
         return resultMsgQueue
-            
+
 # How to get credentials/sources from dictionary:
-# RSPolicyValue = RS.PolicyVault["C1"][1:-1], 
+# RSPolicyValue = RS.PolicyVault["C1"][1:-1],
 # RSPolicyValue = RSPolicyValue.split(',')
-# 
+#
 # printing those values:
 # for obj in RSPolicyValue:
 #     print(obj)
 
 # Message flow:
-# Client (Request C1) -> 
-# RS (Request C2, C3) -> 
-# Client (Request C2) -> 
-# AS1 (Offer C2 Resource) -> 
-# Client (Request C3) -> 
-# AS2 (Request C4) -> 
-# Client (Offer C4 Resource) -> 
-# AS2 (Offer C3 Resource) -> 
+# Client (Request C1) ->
+# RS (Request C2, C3) ->
+# Client (Request C2) ->
+# AS1 (Offer C2 Resource) ->
+# Client (Request C3) ->
+# AS2 (Request C4) ->
+# Client (Offer C4 Resource) ->
+# AS2 (Offer C3 Resource) ->
 # Client (Offer C2/C3 Resources) ->
-# RS (Offer C1 Resource) -> 
+# RS (Offer C1 Resource) ->
 # Client (Received Requested C1 Resource, done)
